@@ -113,6 +113,9 @@ module Data.ByteString.Char8 (
         -- ** Breaking strings
         take,                   -- :: Int -> ByteString -> ByteString
         drop,                   -- :: Int -> ByteString -> ByteString
+        dropSpace,
+        breakSpace,
+        breakChar,
         splitAt,                -- :: Int -> ByteString -> (ByteString, ByteString)
         takeWhile,              -- :: (Char -> Bool) -> ByteString -> ByteString
         dropWhile,              -- :: (Char -> Bool) -> ByteString -> ByteString

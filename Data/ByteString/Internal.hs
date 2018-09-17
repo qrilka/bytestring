@@ -73,7 +73,10 @@ module Data.ByteString.Internal (
 
         -- * Deprecated and unmentionable
         accursedUnutterablePerformIO, -- :: IO a -> a
-        inlinePerformIO               -- :: IO a -> a
+        inlinePerformIO,               -- :: IO a -> a
+
+        -- * Other
+        zipWith'
   ) where
 
 import Prelude hiding (concat, null)
@@ -560,6 +563,30 @@ isSpaceChar8 c =
 
 overflowError :: String -> a
 overflowError fun = error $ "Data.ByteString." ++ fun ++ ": size overflow"
+
+--
+-- | A specialised version of zipWith for the common case of a
+-- simultaneous map over two bytestrings, to build a 3rd. Rewrite rules
+-- are used to automatically covert zipWith into zipWith' when a pack is
+-- performed on the result of zipWith.
+--
+zipWith' :: (Word8 -> Word8 -> Word8) -> ByteString -> ByteString -> ByteString
+zipWith' f (PS fp s l) (PS fq t m) = unsafeDupablePerformIO $
+    withForeignPtr fp $ \a ->
+    withForeignPtr fq $ \b ->
+    create len $ zipWith_ 0 (a `plusPtr` s) (b `plusPtr` t)
+  where
+    zipWith_ :: Int -> Ptr Word8 -> Ptr Word8 -> Ptr Word8 -> IO ()
+    zipWith_ !n !p1 !p2 !r
+       | n >= len = return ()
+       | otherwise = do
+            x <- peekByteOff p1 n
+            y <- peekByteOff p2 n
+            pokeByteOff r n (f x y)
+            zipWith_ (n+1) p1 p2 r
+
+    len = min l m
+{-# INLINE zipWith' #-}
 
 ------------------------------------------------------------------------
 

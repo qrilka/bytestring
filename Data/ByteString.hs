@@ -204,7 +204,8 @@ module Data.ByteString (
         hPutStr,                -- :: Handle -> ByteString -> IO ()
         hPutStrLn,              -- :: Handle -> ByteString -> IO ()
 
-        breakByte
+        breakByte,
+        spanByte
 
   ) where
 
@@ -1455,30 +1456,6 @@ zipWith f ps qs
     | null ps || null qs = []
     | otherwise = f (unsafeHead ps) (unsafeHead qs) : zipWith f (unsafeTail ps) (unsafeTail qs)
 {-# NOINLINE [1] zipWith #-}
-
---
--- | A specialised version of zipWith for the common case of a
--- simultaneous map over two bytestrings, to build a 3rd. Rewrite rules
--- are used to automatically covert zipWith into zipWith' when a pack is
--- performed on the result of zipWith.
---
-zipWith' :: (Word8 -> Word8 -> Word8) -> ByteString -> ByteString -> ByteString
-zipWith' f (PS fp s l) (PS fq t m) = unsafeDupablePerformIO $
-    withForeignPtr fp $ \a ->
-    withForeignPtr fq $ \b ->
-    create len $ zipWith_ 0 (a `plusPtr` s) (b `plusPtr` t)
-  where
-    zipWith_ :: Int -> Ptr Word8 -> Ptr Word8 -> Ptr Word8 -> IO ()
-    zipWith_ !n !p1 !p2 !r
-       | n >= len = return ()
-       | otherwise = do
-            x <- peekByteOff p1 n
-            y <- peekByteOff p2 n
-            pokeByteOff r n (f x y)
-            zipWith_ (n+1) p1 p2 r
-
-    len = min l m
-{-# INLINE zipWith' #-}
 
 {-# RULES
 "ByteString specialise zipWith" forall (f :: Word8 -> Word8 -> Word8) p q .

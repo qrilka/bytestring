@@ -140,6 +140,7 @@ prop_mapAccumLCC = eq3
     (D.mapAccumL :: (X -> Char -> (X,Char)) -> X -> B -> (X, B))
     (C.mapAccumL :: (X -> Char -> (X,Char)) -> X -> P -> (X, P))
 
+-- no function `mapIndexed`
 --prop_mapIndexedCC = D.mapIndexed `eq2` C.mapIndexed
 --prop_mapIndexedPL = L.mapIndexed `eq2` P.mapIndexed
 
@@ -510,7 +511,7 @@ prop_scanl1CL     = C.scanl1    `eqnotnull2` (scanl1 :: (Char -> Char -> Char) -
 prop_scanrCL      = C.scanr     `eqnotnull3` (scanr  :: (Char -> Char -> Char) -> Char -> [Char] -> [Char])
 prop_scanr1CL     = C.scanr1    `eqnotnull2` (scanr1 :: (Char -> Char -> Char) -> [Char] -> [Char])
 
--- prop_zipWithPL'   = P.zipWith'  `eq3` (zipWith :: (W -> W -> W) -> [W] -> [W] -> [W])
+prop_zipWithPL'   = P.zipWith'  `eq3` (zipWith :: (W -> W -> W) -> [W] -> [W] -> [W])
 
 prop_zipWithPL    = (P.zipWith  :: (W -> W -> X) -> P   -> P   -> [X]) `eq3`
                       (zipWith  :: (W -> W -> X) -> [W] -> [W] -> [X])
@@ -701,6 +702,7 @@ prop_breakspan xs c = L.break (==c) xs == L.span (/=c) xs
 
 prop_span xs a = (span (/=a) xs) == (let (x,y) = L.span (/=a) (pack xs) in (unpack x, unpack y))
 
+-- commented out
 -- prop_breakByte xs c = L.break (== c) xs == L.breakByte c xs
 
 -- prop_spanByte c xs = (L.span (==c) xs) == L.spanByte c xs
@@ -732,6 +734,7 @@ prop_group xs       = group xs == (map unpack . L.group . pack) xs
 prop_groupBy  f xs  = groupBy f xs == (map unpack . L.groupBy f . pack) xs
 prop_groupBy_LC  f xs  = groupBy f xs == (map LC.unpack . LC.groupBy f .  LC.pack) xs
 
+-- no such function
 -- prop_joinjoinByte xs ys c = L.joinWithByte c xs ys == L.join (L.singleton c) [xs,ys]
 
 prop_index xs =
@@ -763,6 +766,7 @@ prop_elem    xs c = (c `elem` xs)    == (c `L.elem` (pack xs))
 prop_notElem xs c = (c `notElem` xs) == (L.notElem c (pack xs))
 prop_elem_notelem xs c = c `L.elem` xs == not (c `L.notElem` xs)
 
+-- commented out
 -- prop_filterByte  xs c = L.filterByte c xs == L.filter (==c) xs
 -- prop_filterByte2 xs c = unpack (L.filterByte c xs) == filter (==c) (unpack xs)
 
@@ -782,6 +786,7 @@ prop_stripPrefix xs ys = (pack <$> stripPrefix xs ys) == (pack xs `L.stripPrefix
 prop_isSuffixOf xs ys = isSuffixOf xs ys == (pack xs `L.isSuffixOf` pack ys)
 prop_stripSuffix xs ys = (pack <$> stripSuffix xs ys) == (pack xs `L.stripSuffix` pack ys)
 
+-- no such function
 {-
 prop_sort1 xs = sort xs == (unpack . L.sort . pack) xs
 prop_sort2 xs = (not (null xs)) ==> (L.head . L.sort . pack $ xs) == minimum xs
@@ -893,16 +898,15 @@ prop_intercalatePL c x y =
 
     P.pack (intercalate [c] [P.unpack x,P.unpack y])
 
+-- no such function
 -- prop_linessplitBB xs =
 --     (not . C.null) xs ==>
 --     C.lines' xs == C.split '\n' xs
 
 -- false:
-{-
 prop_linessplit2BB xs =
    (not . C.null) xs ==>
-    C.lines xs == C.split '\n' xs ++ (if C.last xs == '\n' then [C.empty] else [])
--}
+    C.lines xs ++ (if C.last xs == '\n' then [C.empty] else []) == C.split '\n' xs
 
 prop_splitsplitWithBB c xs = P.split c xs == P.splitWith (== c) xs
 
@@ -952,6 +956,7 @@ prop_init1BB xs     =
     (not (null xs)) ==>
     init xs    == (P.unpack . P.unsafeInit . P.pack) xs
 
+-- name collides with another test, `nullPS` is not defined
 -- prop_null xs = (null xs) ==> null xs == (nullPS (pack xs))
 
 prop_append1BB xs    = (xs ++ xs) == (P.unpack $ P.pack xs `P.append` P.pack xs)
@@ -969,6 +974,7 @@ prop_append3LL_monoid xs ys = mappend xs ys == L.pack (L.unpack xs ++ L.unpack y
 prop_map1BB f xs   = P.map f (P.pack xs)    == P.pack (map f xs)
 prop_map2BB f g xs = P.map f (P.map g xs) == P.map (f . g) xs
 prop_map3BB f xs   = map f xs == (P.unpack . P.map f .  P.pack) xs
+-- no `map'`
 -- prop_mapBB' f xs   = P.map' f (P.pack xs) == P.pack (map f xs)
 
 prop_filter1BB xs   = (filter (=='X') xs) == (C.unpack $ C.filter (=='X') (C.pack xs))
@@ -1072,6 +1078,7 @@ prop_unlinesLC xs = (unlines.lines) xs == (LC.unpack. LC.unlines .  LC.lines .LC
 
 prop_wordsBB xs =
     (words xs) == ((map C.unpack) . C.words . C.pack) xs
+-- commented out `tokens`
 -- prop_wordstokensBB xs = C.words xs == C.tokens isSpace xs
 
 prop_unwordsBB xs =
@@ -1090,6 +1097,7 @@ prop_joinBB xs ys = (concat . (intersperse ys) . lines) xs ==
 prop_elemIndex1BB xs   = (elemIndex 'X' xs) == (C.elemIndex 'X' (C.pack xs))
 prop_elemIndex2BB xs c = (elemIndex c xs) == (C.elemIndex c (C.pack xs))
 
+-- undefined `lineIndices`
 -- prop_lineIndices1BB xs = C.elemIndices '\n' xs == C.lineIndices xs
 
 prop_countBB c xs = length (P.elemIndices c xs) == P.count c xs
@@ -1136,18 +1144,19 @@ prop_sort5BB xs ys =
 
 prop_intersperseBB c xs = (intersperse c xs) == (P.unpack $ P.intersperse c (P.pack xs))
 
--- prop_transposeBB xs = (transpose xs) == ((map P.unpack) . P.transpose .  (map P.pack)) xs
+prop_transposeBB xs = (transpose xs) == ((map P.unpack) . P.transpose .  (map P.pack)) xs
 
 prop_maximumBB xs = (not (null xs)) ==> (maximum xs) == (P.maximum ( P.pack xs ))
 prop_minimumBB xs = (not (null xs)) ==> (minimum xs) == (P.minimum ( P.pack xs ))
 
--- prop_dropSpaceBB xs    = dropWhile isSpace xs == C.unpack (C.dropSpace (C.pack xs))
+prop_dropSpaceBB xs    = dropWhile isSpace xs == C.unpack (C.dropSpace (C.pack xs))
+-- haddocks in commented out code claim in to be effective than going through 2 reversals
 -- prop_dropSpaceEndBB xs = (C.reverse . (C.dropWhile isSpace) . C.reverse) (C.pack xs) ==
 --                        (C.dropSpaceEnd (C.pack xs))
 
--- prop_breakSpaceBB xs =
---     (let (x,y) = C.breakSpace (C.pack xs)
---      in (C.unpack x, C.unpack y)) == (break isSpace xs)
+prop_breakSpaceBB xs =
+    (let (x,y) = C.breakSpace (C.pack xs)
+     in (C.unpack x, C.unpack y)) == (break isSpace xs)
 
 prop_spanEndBB xs =
         (C.spanEnd (not . isSpace) (C.pack xs)) ==
@@ -1156,11 +1165,12 @@ prop_spanEndBB xs =
 prop_breakEndBB p xs = P.breakEnd (not.p) xs == P.spanEnd p xs
 prop_breakEndCC p xs = C.breakEnd (not.p) xs == C.spanEnd p xs
 
-{-
 prop_breakCharBB c xs =
         (break (==c) xs) ==
         (let (x,y) = C.breakChar c (C.pack xs) in (C.unpack x, C.unpack y))
 
+-- no such functions
+{-
 prop_spanCharBB c xs =
         (break (/=c) xs) ==
         (let (x,y) = C.spanChar c (C.pack xs) in (C.unpack x, C.unpack y))
@@ -1264,6 +1274,7 @@ prop_readinteger2BB s =
     let s' = filter (\c -> c `notElem` ['0'..'9']) s
     in C.readInteger (C.pack s') == Nothing
 
+-- `filterChar` is included 2 times as commented out code
 -- prop_filterChar1BB c xs = (filter (==c) xs) == ((C.unpack . C.filterChar c . C.pack) xs)
 -- prop_filterChar2BB c xs = (C.filter (==c) (C.pack xs)) == (C.filterChar c (C.pack xs))
 -- prop_filterChar3BB c xs = C.filterChar c xs == C.replicate (C.count c xs) c
@@ -1280,7 +1291,7 @@ prop_zip1BB xs ys = P.zip xs ys == zip (P.unpack xs) (P.unpack ys)
 prop_zipWithBB xs ys = P.zipWith (,) xs ys == P.zip xs ys
 prop_zipWithCC xs ys = C.zipWith (,) xs ys == C.zip xs ys
 prop_zipWithLC xs ys = LC.zipWith (,) xs ys == LC.zip xs ys
--- prop_zipWith'BB xs ys = P.pack (P.zipWith (+) xs ys) == P.zipWith' (+) xs ys
+prop_zipWith'BB xs ys = P.pack (P.zipWith (+) xs ys) == P.zipWith' (+) xs ys
 
 prop_unzipBB x = let (xs,ys) = unzip x in (P.pack xs, P.pack ys) == P.unzip x
 
@@ -1292,11 +1303,11 @@ prop_unzipBB x = let (xs,ys) = unzip x in (P.pack xs, P.pack ys) == P.unzip x
 -- prop_join_spec c s1 s2 =
 --  P.join (P.singleton c) (s1 : s2 : []) == P.joinWithByte c s1 s2
 
--- prop_break_spec x s =
---     P.break ((==) x) s == P.breakByte x s
+prop_break_spec x s =
+    P.break ((==) x) s == P.breakByte x s
 
--- prop_span_spec x s =
---     P.span ((==) x) s == P.spanByte x s
+prop_span_spec x s =
+    P.span ((==) x) s == P.spanByte x s
 
 ------------------------------------------------------------------------
 
@@ -2007,7 +2018,7 @@ pl_tests =
     , testProperty "zipWith"          prop_zipWithPL
 --  , testProperty "zipWith"          prop_zipWithCL
     , testProperty "zipWith rules"   prop_zipWithPL_rules
---  , testProperty "zipWith/zipWith'" prop_zipWithPL'
+    , testProperty "zipWith/zipWith'" prop_zipWithPL'
 
     , testProperty "isPrefixOf"  prop_isPrefixOfPL
     , testProperty "isSuffixOf"  prop_isSuffixOfPL
@@ -2165,13 +2176,14 @@ bb_tests =
     , testProperty "sort 4"         prop_sort4BB
     , testProperty "sort 5"         prop_sort5BB
     , testProperty "intersperse"    prop_intersperseBB
+    , testProperty "transpose"      prop_transposeBB
     , testProperty "maximum"        prop_maximumBB
     , testProperty "minimum"        prop_minimumBB
---  , testProperty "breakChar"      prop_breakCharBB
+    , testProperty "breakChar"      prop_breakCharBB
 --  , testProperty "spanChar 1"     prop_spanCharBB
 --  , testProperty "spanChar 2"     prop_spanChar_1BB
---  , testProperty "breakSpace"     prop_breakSpaceBB
---  , testProperty "dropSpace"      prop_dropSpaceBB
+    , testProperty "breakSpace"     prop_breakSpaceBB
+    , testProperty "dropSpace"      prop_dropSpaceBB
     , testProperty "spanEnd"        prop_spanEndBB
     , testProperty "breakEnd"       prop_breakEndBB
     , testProperty "breakEnd"       prop_breakEndCC
@@ -2249,7 +2261,7 @@ bb_tests =
     , testProperty "intercalate"    prop_intercalatePL
 --     , testProperty "lineIndices"    prop_lineIndices1BB
     , testProperty "count"          prop_countBB
---  , testProperty "linessplit"     prop_linessplit2BB
+    , testProperty "linessplit"     prop_linessplit2BB
     , testProperty "splitsplitWith" prop_splitsplitWithBB
 --  , testProperty "joinjoinpath"   prop_joinjoinpathBB
     , testProperty "zip"            prop_zipBB
@@ -2258,12 +2270,12 @@ bb_tests =
     , testProperty "zipWith"        prop_zipWithBB
     , testProperty "zipWith"        prop_zipWithCC
     , testProperty "zipWith"        prop_zipWithLC
---  , testProperty "zipWith'"       prop_zipWith'BB
+    , testProperty "zipWith'"       prop_zipWith'BB
     , testProperty "unzip"          prop_unzipBB
     , testProperty "concatMap"      prop_concatMapBB
 --  , testProperty "join/joinByte"  prop_join_spec
---  , testProperty "span/spanByte"  prop_span_spec
---  , testProperty "break/breakByte"prop_break_spec
+    , testProperty "span/spanByte"  prop_span_spec
+    , testProperty "break/breakByte"prop_break_spec
     ]
 
 
@@ -2313,7 +2325,7 @@ ll_tests =
     , testProperty "reverse"            prop_reverse
     , testProperty "reverse1"           prop_reverse1
     , testProperty "reverse2"           prop_reverse2
---  , testProperty "transpose"          prop_transpose
+    , testProperty "transpose"          prop_transpose
     , testProperty "foldl"              prop_foldl
     , testProperty "foldl/reverse"      prop_foldl_1
     , testProperty "foldr"              prop_foldr
@@ -2331,7 +2343,7 @@ ll_tests =
     , testProperty "all"                prop_all
     , testProperty "maximum"            prop_maximum
     , testProperty "minimum"            prop_minimum
---  , testProperty "replicate 1"        prop_replicate1
+    , testProperty "replicate 1"        prop_replicate1
     , testProperty "replicate 2"        prop_replicate2
     , testProperty "take"               prop_take1
     , testProperty "drop"               prop_drop1
